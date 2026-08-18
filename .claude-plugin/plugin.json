@@ -1,0 +1,7 @@
+{
+  "name": "dokuwiki",
+  "version": "1.0.0",
+  "description": "Connects Claude to a DokuWiki instance through the DokuWiki MCP plugin over Streamable HTTP.",
+  "keywords": ["dokuwiki", "wiki", "mcp"],
+  "mcpServers": "./.mcp.json"
+}

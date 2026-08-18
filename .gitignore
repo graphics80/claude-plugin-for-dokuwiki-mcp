@@ -1,0 +1,8 @@
+# Never commit a configured copy of the plugin
+*.plugin
+*.zip
+
+# Local editor / OS noise
+.DS_Store
+.idea/
+.vscode/
