@@ -38,11 +38,27 @@ Work through the symptom the wiki reports, in this order.
 Send the user to the plugin's configuration and have them enter both values,
 then reconnect.
 
-**`No API token was sent`** — neither header reached PHP. Both are sent on
-purpose: `Authorization: Bearer <token>` and `X-DokuWiki-Token: <token>`.
-Apache with CGI/FastCGI strips `Authorization` unless `CGIPassAuth On` is set,
-which is what the second header covers. If both are missing, a proxy in front
-of the wiki is dropping custom headers.
+**`No API token was sent`** — the `Authorization` header never reached PHP.
+Apache withholds it from CGI, FastCGI and FPM backends by default, so the token
+is invisible to the wiki even though the client sent it. This is a wiki-side
+fix, not a plugin setting. In `lib/plugins/mcp/.htaccess` on the wiki:
+
+```apache
+<IfModule mod_setenvif.c>
+    SetEnvIf Authorization "(.*)" HTTP_AUTHORIZATION=$1
+</IfModule>
+```
+
+It needs `AllowOverride FileInfo` for that directory; where `.htaccess` is
+disabled, `CGIPassAuth On` in the server configuration does the same. Verify
+with a plain `initialize` call and read the `instructions` field of the answer:
+a successful handshake alone proves nothing, because the server answers it
+anonymously too.
+
+If the wiki's configuration cannot be changed, DokuWiki also accepts the token
+in an `X-DokuWiki-Token` header, which no server strips. Claude's connector
+settings reject custom header names, so this only helps in Claude Code, where
+the header can be added to the `headers` block by hand.
 
 **`The credentials sent in the … header were not accepted`** — the token
 arrived and is wrong. It was reset in the user profile, or copied with

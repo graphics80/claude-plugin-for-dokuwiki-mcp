@@ -37,7 +37,6 @@ At connection time the values are substituted into `.mcp.json`:
       "type": "http",
       "url": "${user_config.wiki_url}",
       "headers": {
-        "X-DokuWiki-Token": "${user_config.api_token}",
         "Authorization": "Bearer ${user_config.api_token}"
       }
     }
@@ -45,12 +44,38 @@ At connection time the values are substituted into `.mcp.json`:
 }
 ```
 
-### Why the token is sent twice
+### The Authorization header has to reach PHP
 
-Many web servers — Apache with CGI/FastCGI and no `CGIPassAuth On` being the usual suspect — strip the
-`Authorization` header before PHP ever sees it. The wiki then reports *"No API token was sent"* even
-though a token is configured, which is a confusing thing to debug. `X-DokuWiki-Token` survives that.
-When both arrive, the DokuWiki plugin prefers the custom header.
+Apache withholds the `Authorization` header from CGI, FastCGI and FPM backends by default, so that
+scripts cannot read Basic Auth credentials. PHP then never sees the token and the wiki answers
+*"No API token was sent"* even though one was provided — a confusing thing to debug, because the
+message points at the client.
+
+The fix belongs on the wiki. In `lib/plugins/mcp/.htaccess`:
+
+```apache
+<IfModule mod_setenvif.c>
+    SetEnvIf Authorization "(.*)" HTTP_AUTHORIZATION=$1
+</IfModule>
+```
+
+That needs `AllowOverride FileInfo` for the directory. Where `.htaccess` files are disabled, put
+`CGIPassAuth On` into the server configuration for that directory instead — it is the more direct
+directive, but it belongs to the `AllowOverride AuthConfig` class and returns a 500 where only
+`FileInfo` is granted, so it is not safe to put in a shipped `.htaccess`.
+
+Upstream carries this as [PR #14](https://github.com/cosmocode/dokuwiki-plugin-mcp/pull/14); once it is
+merged, a current install of the server-side plugin brings the file along.
+
+DokuWiki also accepts the token in an `X-DokuWiki-Token` header, which no server strips. This plugin
+does not use it: Claude's connector settings only accept header names from an approved list, and a
+custom name is rejected there. In Claude Code, where the restriction does not apply, adding
+
+```json
+"X-DokuWiki-Token": "${user_config.api_token}"
+```
+
+to the `headers` block works as a fallback for a wiki whose server configuration cannot be changed.
 
 ### OAuth instead of a shared token
 
@@ -130,7 +155,7 @@ permissions. See the [organization plugin docs](https://claude.com/docs/third-pa
 | Symptom | Cause |
 |---|---|
 | URL or token appears literally as `${user_config.wiki_url}` / `${user_config.api_token}` | The plugin settings were never filled in. Re-enter them in the plugin's configuration and reconnect. |
-| `No API token was sent` | Neither header reached PHP. The `Authorization` header was stripped in transit — this is what `X-DokuWiki-Token` is for. If both are gone, a proxy is dropping custom headers. |
+| `No API token was sent` | The `Authorization` header did not reach PHP. Apache hides it from CGI/FastCGI/FPM backends unless configured otherwise — see *The Authorization header has to reach PHP*. |
 | `The credentials sent in the … header were not accepted` | The token arrived but is invalid or was reset in the user profile. |
 | `not authorized to call method …` | Token is valid, but the user is not covered by `remoteuser`, or lacks ACL permission for that page. |
 | 404, or HTML instead of a tool result | Wrong endpoint URL, or the server-side plugin is not in `lib/plugins/mcp/`. |
@@ -156,6 +181,10 @@ To check permissions for a page, ask Claude to call `core_aclCheck`. It returns 
 Version 1.x required editing `.mcp.json` with the endpoint and token, then re-zipping the plugin for
 every change. Nothing needs to be edited any more: reinstall the plugin and enter both values when
 asked. Delete any old `.plugin` file — it contains a copy of your token.
+
+Version 2.1 dropped the `X-DokuWiki-Token` header, because Claude's connector settings reject custom
+header names. A wiki that relied on it needs the server-side change described above; until then the
+header can be added back by hand in Claude Code.
 
 ## Related
 
