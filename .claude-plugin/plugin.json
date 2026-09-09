@@ -1,7 +1,30 @@
 {
   "name": "dokuwiki",
-  "version": "1.0.0",
-  "description": "Connects Claude to a DokuWiki instance through the DokuWiki MCP plugin over Streamable HTTP.",
-  "keywords": ["dokuwiki", "wiki", "mcp"],
-  "mcpServers": "./.mcp.json"
+  "displayName": "DokuWiki",
+  "version": "2.0.0",
+  "description": "Search, read and edit a DokuWiki instance through the DokuWiki MCP plugin over Streamable HTTP. Endpoint and access token are entered when the plugin is enabled — no files to edit.",
+  "author": {
+    "name": "Kevin Maurizi",
+    "url": "https://github.com/graphics80"
+  },
+  "homepage": "https://github.com/graphics80/claude-plugin-for-dokuwiki-mcp",
+  "repository": "https://github.com/graphics80/claude-plugin-for-dokuwiki-mcp",
+  "license": "MIT",
+  "keywords": ["dokuwiki", "wiki", "knowledge-base", "mcp"],
+  "mcpServers": "./.mcp.json",
+  "userConfig": {
+    "wiki_url": {
+      "type": "string",
+      "title": "Wiki MCP endpoint",
+      "description": "Full URL of the MCP endpoint on your wiki — your wiki address plus /lib/plugins/mcp/mcp.php, for example https://wiki.example.com/lib/plugins/mcp/mcp.php",
+      "required": true
+    },
+    "api_token": {
+      "type": "string",
+      "title": "DokuWiki API token",
+      "description": "Your personal token from User Profile → Authentication Token. It carries your own wiki permissions, so Claude never sees more than you can.",
+      "sensitive": true,
+      "required": true
+    }
+  }
 }

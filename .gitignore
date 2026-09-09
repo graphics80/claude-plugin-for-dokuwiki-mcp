@@ -6,3 +6,6 @@
 .DS_Store
 .idea/
 .vscode/
+
+# Packaged plugin builds
+dist/

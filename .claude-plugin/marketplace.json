@@ -1,0 +1,18 @@
+{
+  "name": "dokuwiki-mcp",
+  "description": "Claude plugin that connects Claude to a DokuWiki instance running the DokuWiki MCP plugin.",
+  "owner": {
+    "name": "Kevin Maurizi",
+    "url": "https://github.com/graphics80"
+  },
+  "plugins": [
+    {
+      "name": "dokuwiki",
+      "displayName": "DokuWiki",
+      "source": "./",
+      "category": "wiki-knowledge-base",
+      "description": "Search, read and edit a DokuWiki instance through the DokuWiki MCP plugin over Streamable HTTP.",
+      "homepage": "https://github.com/graphics80/claude-plugin-for-dokuwiki-mcp"
+    }
+  ]
+}
