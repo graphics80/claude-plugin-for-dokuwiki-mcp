@@ -2,10 +2,10 @@
   "mcpServers": {
     "dokuwiki": {
       "type": "http",
-      "url": "https://example.com/lib/plugins/mcp/mcp.php",
+      "url": "${user_config.wiki_url}",
       "headers": {
-        "X-DokuWiki-Token": "REPLACE_WITH_YOUR_DOKUWIKI_TOKEN",
-        "Authorization": "Bearer REPLACE_WITH_YOUR_DOKUWIKI_TOKEN"
+        "X-DokuWiki-Token": "${user_config.api_token}",
+        "Authorization": "Bearer ${user_config.api_token}"
       }
     }
   }
