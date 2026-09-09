@@ -1,7 +1,7 @@
 {
   "name": "dokuwiki",
   "displayName": "DokuWiki",
-  "version": "2.0.0",
+  "version": "2.1.0",
   "description": "Search, read and edit a DokuWiki instance through the DokuWiki MCP plugin over Streamable HTTP. Endpoint and access token are entered when the plugin is enabled — no files to edit.",
   "author": {
     "name": "Kevin Maurizi",

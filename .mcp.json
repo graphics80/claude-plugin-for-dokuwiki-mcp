@@ -4,7 +4,6 @@
       "type": "http",
       "url": "${user_config.wiki_url}",
       "headers": {
-        "X-DokuWiki-Token": "${user_config.api_token}",
         "Authorization": "Bearer ${user_config.api_token}"
       }
     }
